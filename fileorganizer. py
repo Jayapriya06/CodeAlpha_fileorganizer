@@ -1,0 +1,54 @@
+import os
+import shutil
+import datetime
+
+# Define file type categories
+FILE_CATEGORIES = {
+    "Images": [".jpg", ".jpeg", ".png", ".gif", ".bmp", ".svg"],
+    "Documents": [".pdf", ".docx", ".doc", ".txt", ".xlsx", ".pptx", ".csv"],
+    "Videos": [".mp4", ".avi", ".mov", ".mkv", ".flv"],
+    "Music": [".mp3", ".wav", ".aac", ".flac"],
+    "Archives": [".zip", ".rar", ".tar", ".gz", ".7z"],
+    "Executables": [".exe", ".apk", ".bat", ".sh", ".msi"],
+    "Programming Files": [".py", ".java", ".cpp", ".js", ".html", ".css"]
+}
+
+LOG_FILE = "file_organizer_log.txt"
+
+def log_action(message):
+    """Logs actions to a file for tracking."""
+    with open(LOG_FILE, "a") as log:
+        log.write(f"{datetime.datetime.now()} - {message}\n")
+
+def organize_files(directory):
+    if not os.path.exists(directory):
+        print("Directory does not exist.")
+        return
+
+    # Create subfolders for categories if they don't exist
+    for category in FILE_CATEGORIES.keys():
+        folder_path = os.path.join(directory, category)
+        if not os.path.exists(folder_path):
+            os.makedirs(folder_path)
+
+    file_count = 0
+
+    # Move files to respective category folders
+    for file in os.listdir(directory):
+        file_path = os.path.join(directory, file)
+        if os.path.isfile(file_path):  # Check if it's a file
+            for category, extensions in FILE_CATEGORIES.items():
+                if file.lower().endswith(tuple(extensions)):
+                    dest_path = os.path.join(directory, category, file)
+                    shutil.move(file_path, dest_path)
+                    print(f"Moved: {file} → {category}")
+                    log_action(f"Moved {file} to {category}")
+                    file_count += 1
+
+    print(f"\nFile organization complete! {file_count} files moved.")
+    log_action(f"Total {file_count} files moved.")
+
+# Run the script
+if __name__ == "__main__":
+    folder_to_organize = input("Enter the path of the folder to organize: ")
+    organize_files(folder_to_organize)
